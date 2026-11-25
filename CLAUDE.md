@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-There is no build, lint, or test tooling. Open `index.html` directly in a browser to run it. Deployment: pushing to `main` runs `.github/workflows/deploy.yml`, which publishes only `index.html` to GitHub Pages (repo Settings → Pages → Source must be "GitHub Actions"). Any new runtime file must be added to the "Prepare site" step.
+There is no build, lint, or test tooling. Open `index.html` directly in a browser to run it. Deployment: GitHub Pages serves the `main` branch root directly (Settings → Pages → Deploy from a branch); there is no workflow.
 
 ## Architecture (the `<script>` block at the bottom of `index.html`)
 
