@@ -179,7 +179,7 @@ h1:focus, h2:focus { outline: none; }
 .axis strong { font-weight: 500; color: var(--ink); }
 .axis-y {
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
+  text-orientation: upright;
   grid-column: 1; grid-row: 1;
 }
 .axis-x { grid-column: 2; grid-row: 2; }
@@ -573,9 +573,9 @@ h1:focus, h2:focus { outline: none; }
   function buildMap(container, activeKey, pos) {
     container.textContent = "";
     var y = el("div", "axis axis-y");
-    y.appendChild(el("span", null, "低"));
-    y.appendChild(el("strong", null, "風險承受度"));
     y.appendChild(el("span", null, "高"));
+    y.appendChild(el("strong", null, "風險承受度"));
+    y.appendChild(el("span", null, "低"));
     var grid = el("div", "map-grid");
     CELLS.forEach(function (key) {
       var t = TYPES[key];
