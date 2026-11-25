@@ -260,6 +260,8 @@ h1:focus, h2:focus { outline: none; }
 
 .q-body { margin-top: 36px; }
 .q-body.swap { animation: enter .3s ease both; }
+.q-hint { margin: -4px 0 18px; color: var(--muted); font-size: .88rem; }
+.q-hint[hidden] { display: none; }
 .q-text {
   font-family: var(--serif);
   font-weight: 700;
@@ -416,6 +418,7 @@ h1:focus, h2:focus { outline: none; }
   <div id="start" class="screen start">
     <h1>你的錢，<br>適合放在哪裡？</h1>
     <p class="lead">回答 10 個生活情境題，大約 2 分鐘。看看定存、基金、ETF 和個股，哪一種比較符合你的個性和現況。</p>
+    <p class="lead">沒投資過也沒關係，情境題都寫明了金額和期間，照你的直覺選就好；問到你的存款和資金用途的兩題，則請依實際狀況回答。</p>
     <button class="btn" id="startBtn" type="button">開始測驗</button>
     <div class="map" id="startMap" aria-hidden="true"></div>
     <p class="map-caption">測驗會從「能承受多少風險」和「願意花多少心力」兩個方向，找出你的位置。</p>
@@ -430,6 +433,7 @@ h1:focus, h2:focus { outline: none; }
     <div class="bar" id="bar" aria-hidden="true"></div>
     <div class="q-body" id="qBody">
       <h2 class="q-text" id="qText" tabindex="-1"></h2>
+      <p class="q-hint" id="qHint"></p>
       <div class="options" id="options"></div>
     </div>
   </div>
@@ -477,27 +481,80 @@ h1:focus, h2:focus { outline: none; }
   "use strict";
 
   // dim: r = 風險承受度, i = 投入程度, c = 資金狀況；選項分數依序為 0 到 3
+  var REAL = "這題請依你目前實際的狀況回答。";
+
+  // 選項依分數 0 到 3 排列；畫面上會隨機打亂順序，避免一眼看出由低到高
   var QUESTIONS = [
-    { id: "loss", dim: "r", text: "你投入的 10 萬元，一個月後帳面只剩 8 萬。你會怎麼做？",
-      options: ["全部賣掉，不想再虧下去", "賣掉一部分，讓自己安心一點", "先不動，等它漲回來", "當初買進的理由還在的話，再加碼"] },
-    { id: "time", dim: "i", text: "你每週願意花多少時間在投資上？",
-      options: ["幾乎不想花時間", "一小時以內", "二到五小時", "五小時以上，我對這個有興趣"] },
-    { id: "range", dim: "r", text: "下面四種一年後的可能結果，你會選哪一個？",
-      options: ["穩穩多 1% 到 2%，不會虧", "可能賺 6%，也可能虧 3%", "可能賺 15%，也可能虧 10%", "可能賺 40%，也可能虧 30%"] },
-    { id: "fund", dim: "c", text: "如果明天突然沒有收入，你手上的存款可以支撐多久的生活？",
-      options: ["不到一個月", "一到三個月", "三到六個月", "六個月以上"] },
-    { id: "mood", dim: "r", text: "投資的錢正在虧損時，你的日常生活會怎樣？",
-      options: ["睡不好，腦中一直想著這件事", "常常忍不住打開帳戶查看", "有點在意，但生活照常", "幾乎不受影響"] },
-    { id: "know", dim: "i", text: "下面哪一句話最接近你現在的狀況？",
-      options: ["我不太清楚股票和基金有什麼差別", "我知道 ETF 是一次買進一籃子股票", "我看得懂本益比、殖利率這類數字", "我會讀財報，也有自己的選股方法"] },
-    { id: "crash", dim: "r", text: "新聞說股市一週內大跌了 15%。你的第一個念頭是什麼？",
-      options: ["趕快把錢移到安全的地方", "先觀望，暫時不再投入", "長期來看會漲回來，照原本的計畫走", "這是便宜買進的機會"] },
-    { id: "horizon", dim: "c", text: "這筆打算拿來投資的錢，多久之內可能會用到？",
-      options: ["一年之內", "一到三年", "三到五年", "五年以上，或沒有特定用途"] },
-    { id: "style", dim: "i", text: "決定要買什麼的時候，你比較想怎麼做？",
-      options: ["不想選，越簡單越好", "買一個涵蓋整個市場的商品就好", "我會比較幾個選項再決定", "我想自己研究、自己挑"] },
-    { id: "lever", dim: "r", text: "有人建議你借錢，或用融資、槓桿型 ETF 來放大報酬。你會怎麼想？",
-      options: ["絕對不會", "不太會，聽起來風險太高", "了解清楚之後，可能小額嘗試", "會，我想放大報酬"] }
+    { id: "loss", dim: "r", text: "你把 50 萬閒錢投入一檔基金，三個月後帳面剩 42 萬，同期大盤約跌 8%。你會怎麼做？",
+      options: [
+        "認賠賣出。跌得比大盤還多，我不想再承擔這種風險",
+        "先賣掉一半，剩下的繼續觀察，至少把風險降下來",
+        "先不動。查清楚下跌原因，只要不是基金本身出問題就繼續持有",
+        "趁低檔加碼。只要當初的理由沒變，下跌就是用更低成本買進"
+      ] },
+    { id: "time", dim: "i", text: "你平常工作已經很忙。如果要自己管理投資，你實際上做得到的是哪一種？",
+      options: [
+        "設定好就不想再碰，一年看一兩次就夠了",
+        "每個月花一點時間看整體狀況，必要時微調",
+        "每週追蹤財經新聞和持有的標的，定期檢討要不要調整",
+        "每天都會關注，願意花時間讀財報、法說會和產業資料"
+      ] },
+    { id: "range", dim: "r", text: "你有一筆 100 萬，預計放五年。下面四種方案，你會選哪一個？",
+      options: [
+        "預期年化約 1.5%，本金幾乎不會虧，五年後約 108 萬",
+        "預期年化約 4%，過程中最多可能暫時回檔 5%，五年後約 122 萬",
+        "預期年化約 7%，過程中可能回檔 20%，五年後約 140 萬",
+        "預期年化約 11%，過程中可能腰斬，五年後約 168 萬，但也可能遠低於此"
+      ] },
+    { id: "fund", dim: "c", hint: REAL, text: "如果收入突然中斷，不靠借錢，你目前的存款能維持現在的生活多久？",
+      options: [
+        "不到一個月，目前幾乎是月光",
+        "大約一到三個月",
+        "大約三到六個月",
+        "六個月以上，而且和打算投資的錢是分開的"
+      ] },
+    { id: "mood", dim: "r", text: "你的投資在兩個月內帳面虧損 20%，但你沒有賣。接下來幾週，你的生活最可能是哪一種？",
+      options: [
+        "很難放鬆，一直在想要不要賣，睡眠和工作都受到影響",
+        "忍不住每天看好幾次帳戶，心情跟著數字起伏",
+        "有些不安，但提醒自己照計畫走，生活大致如常",
+        "不太受影響，當初就預期過會有這種波動"
+      ] },
+    { id: "know", dim: "i", text: "朋友推薦你買一檔最近很熱門的高股息 ETF。你會怎麼評估？",
+      options: [
+        "大家都說好就跟著買，我不太知道該怎麼判斷",
+        "看配息率和近一年的報酬，再決定要不要買",
+        "查它追蹤的指數、成分股、費用率和配息來源，並和同類型 ETF 比較",
+        "檢視成分股的獲利是否撐得起配息，評估填息能力、換股規則和稅負後才決定"
+      ] },
+    { id: "crash", dim: "r", text: "你原本的計畫是長期持有。市場一週大跌 15%，新聞一片悲觀，你的部位也跟著跌。你最可能怎麼做？",
+      options: [
+        "先賣掉，等市場穩定再回來。保住剩下的比較重要",
+        "不賣，但暫停投入，等局勢明朗再說",
+        "照原本的定期定額計畫繼續，不因新聞改變",
+        "把預留的現金分批投入，把大跌當成買進的機會"
+      ] },
+    { id: "horizon", dim: "c", hint: REAL, text: "這筆打算投資的錢，可能什麼時候要動用？（例如買房頭期款、結婚、換車、進修）",
+      options: [
+        "一年之內就可能用到",
+        "一到三年內可能會用到",
+        "三到五年內，時間還不確定",
+        "五年以上，或沒有特定用途，可以放很久"
+      ] },
+    { id: "style", dim: "i", text: "你拿到 30 萬準備投資。下面哪一種做法最接近你？",
+      options: [
+        "請銀行或理專推薦，照著他們的建議配置",
+        "挑一檔追蹤大盤的商品，每月固定投入，不再多想",
+        "比較幾檔基金或 ETF 的費用、績效和風險，自己組合出配置",
+        "研究個別公司，挑出我認為被低估的股票，自己決定買賣時機"
+      ] },
+    { id: "lever", dim: "r", text: "你看好某檔股票，有人建議你用融資多買一倍的部位。判斷對了報酬放大，判斷錯了可能被追繳保證金。你會怎麼做？",
+      options: [
+        "不考慮，借錢投資不在我的原則內",
+        "不太會，除非有充足的現金可以隨時補保證金",
+        "小額嘗試，並事先設好停損點和能承受的最大虧損",
+        "會。只要有把握，適度運用槓桿是放大報酬的合理工具"
+      ] }
   ];
 
   var ASSETS = [
@@ -553,6 +610,7 @@ h1:focus, h2:focus { outline: none; }
     }
   };
 
+  var orders = {};
   var answers = {};
   var current = 0;
   var locked = false;
@@ -632,11 +690,21 @@ h1:focus, h2:focus { outline: none; }
     renderBar();
 
     $("qText").textContent = q.text;
+    $("qHint").textContent = q.hint || "";
+    $("qHint").hidden = !q.hint;
     var box = $("options");
     box.textContent = "";
-    q.options.forEach(function (label, score) {
-      var b = el("button", "opt" + (answers[q.id] === score ? " picked" : ""), label);
+    if (!orders[q.id]) {
+      var o = [0, 1, 2, 3];
+      for (var k = o.length - 1; k > 0; k--) {
+        var j = Math.floor(Math.random() * (k + 1)), tmp = o[k]; o[k] = o[j]; o[j] = tmp;
+      }
+      orders[q.id] = o;
+    }
+    orders[q.id].forEach(function (score) {
+      var b = el("button", "opt" + (answers[q.id] === score ? " picked" : ""), q.options[score]);
       b.type = "button";
+      b.dataset.score = String(score);
       b.addEventListener("click", function () { pick(score, b); });
       box.appendChild(b);
     });
@@ -805,6 +873,7 @@ h1:focus, h2:focus { outline: none; }
   // ---------- 事件 ----------
   $("startBtn").addEventListener("click", function () {
     answers = {};
+    orders = {};
     current = 0;
     show("quiz");
     renderQuestion(true);
@@ -817,6 +886,7 @@ h1:focus, h2:focus { outline: none; }
   });
   $("restartBtn").addEventListener("click", function () {
     answers = {};
+    orders = {};
     current = 0;
     show("quiz");
     renderQuestion(true);
@@ -826,7 +896,7 @@ h1:focus, h2:focus { outline: none; }
     var n = parseInt(e.key, 10);
     if (n >= 1 && n <= 4) {
       var btn = $("options").children[n - 1];
-      if (btn) pick(n - 1, btn);
+      if (btn) pick(parseInt(btn.dataset.score, 10), btn);
     }
   });
 
