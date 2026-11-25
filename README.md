@@ -24,7 +24,7 @@
 
 整個測驗只有一個檔案。直接用瀏覽器打開 `index.html` 就能使用，不需要安裝任何東西。
 
-要放上網路的話，可以在 GitHub 的 Settings → Pages 選擇 `main` 分支發布。
+推送到 `main` 後，`.github/workflows/deploy.yml` 會自動部署到 GitHub Pages。第一次使用請到 Settings → Pages，把 Source 設為「GitHub Actions」。
 
 ## 修改內容
 
