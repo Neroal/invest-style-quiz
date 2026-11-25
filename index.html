@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>投資風格測驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #EDF2EF;
+  --surface: #FFFFFF;
+  --ink: #14302C;
+  --muted: #56706B;
+  --line: #CCD8D4;
+  --primary: #0E5F57;
+  --on-primary: #FFFFFF;
+  --tint: #DDEAE6;
+  --warn-bg: #FBEDEA;
+  --warn-line: #CF4B3F;
+  --note-bg: #FBF3DF;
+  --note-line: #D99A1C;
+  --c-deposit: #5F82A1;
+  --c-fund: #2F9488;
+  --c-etf: #E0A32A;
+  --c-stock: #CF4B3F;
+  --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+  --serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0D1C1A;
+    --surface: #152B28;
+    --ink: #E4EDEA;
+    --muted: #9DB3AE;
+    --line: #2C4541;
+    --primary: #56C6B7;
+    --on-primary: #0D1C1A;
+    --tint: #1D3A36;
+    --warn-bg: #3A1F1C;
+    --warn-line: #E2695D;
+    --note-bg: #33290F;
+    --note-line: #EDB548;
+    --c-deposit: #7FA3C2;
+    --c-fund: #45B3A5;
+    --c-etf: #EDB548;
+    --c-stock: #E2695D;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0D1C1A;
+  --surface: #152B28;
+  --ink: #E4EDEA;
+  --muted: #9DB3AE;
+  --line: #2C4541;
+  --primary: #56C6B7;
+  --on-primary: #0D1C1A;
+  --tint: #1D3A36;
+  --warn-bg: #3A1F1C;
+  --warn-line: #E2695D;
+  --note-bg: #33290F;
+  --note-line: #EDB548;
+  --c-deposit: #7FA3C2;
+  --c-fund: #45B3A5;
+  --c-etf: #EDB548;
+  --c-stock: #E2695D;
+}
+
+*, *::before, *::after { box-sizing: inherit; }
+html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, p, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+button { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+
+.wrap {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 28px 20px 40px;
+}
+.screen { animation: enter .35s ease both; }
+@keyframes enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 按鈕 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 0 32px;
+  border: 0;
+  border-radius: 28px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 1.06rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .12s ease, filter .12s ease;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: scale(.98); }
+.btn-ghost {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 10px 4px;
+  color: var(--muted);
+  font-size: .95rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.link-btn:hover { color: var(--ink); }
+:focus-visible { outline: 3px solid var(--note-line); outline-offset: 3px; }
+h1:focus, h2:focus { outline: none; }
+
+/* 開始頁 */
+.start { padding-top: 6vh; }
+.start h1 {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: clamp(2.3rem, 9vw, 3.5rem);
+  line-height: 1.25;
+  letter-spacing: .02em;
+}
+.start .lead {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 1.08rem;
+  max-width: 26em;
+}
+.start .btn { margin-top: 28px; width: 100%; }
+.start .map { margin-top: 44px; }
+.map-caption {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: .92rem;
+}
+
+/* 兩軸圖 */
+.map {
+  display: grid;
+  grid-template-columns: 1.6em 1fr;
+  grid-template-rows: 1fr 1.9em;
+  gap: 6px;
+}
+.axis {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: .82rem;
+  white-space: nowrap;
+}
+.axis strong { font-weight: 500; color: var(--ink); }
+.axis-y {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  grid-column: 1; grid-row: 1;
+}
+.axis-x { grid-column: 2; grid-row: 2; }
+.map-grid {
+  grid-column: 2; grid-row: 1;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  aspect-ratio: 4 / 3;
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.cell {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px;
+  transition: background .3s ease;
+}
+.cell:nth-child(1) { border-right: 1.5px solid var(--line); border-bottom: 1.5px solid var(--line); }
+.cell:nth-child(2) { border-bottom: 1.5px solid var(--line); text-align: right; align-items: flex-end; }
+.cell:nth-child(3) { border-right: 1.5px solid var(--line); justify-content: flex-end; }
+.cell:nth-child(4) { justify-content: flex-end; text-align: right; align-items: flex-end; }
+.cell .inst {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(1.05rem, 4.4vw, 1.35rem);
+  line-height: 1.3;
+}
+.cell .inst i {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  flex: none;
+}
+.cell .tname { color: var(--muted); font-size: .82rem; }
+.cell.active { background: var(--tint); }
+.cell.active .tname { color: var(--ink); font-weight: 500; }
+.dot {
+  position: absolute;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 4px solid var(--surface);
+  box-shadow: 0 0 0 2px var(--ink);
+  transform: translate(-50%, 50%) scale(0);
+  transition: transform .5s cubic-bezier(.3, 1.6, .5, 1) .5s;
+}
+.dot.in { transform: translate(-50%, 50%) scale(1); }
+
+/* 答題頁 */
+.progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+}
+.count { color: var(--muted); font-size: .95rem; }
+.count b { color: var(--ink); font-weight: 700; }
+.bar {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 5px;
+  margin-top: 6px;
+}
+.bar span {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+  transition: background .3s ease;
+}
+.bar span.done { background: var(--primary); }
+.bar span.now { background: var(--note-line); }
+
+.q-body { margin-top: 36px; }
+.q-body.swap { animation: enter .3s ease both; }
+.q-text {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(1.4rem, 5.6vw, 1.8rem);
+  line-height: 1.5;
+}
+.options { margin-top: 26px; display: grid; gap: 12px; }
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 64px;
+  padding: 14px 18px;
+  text-align: left;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 1.04rem;
+  line-height: 1.5;
+  transition: border-color .15s ease, background .15s ease, transform .12s ease;
+}
+.opt::before {
+  content: "";
+  flex: none;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+@media (hover: hover) {
+  .opt:hover { border-color: var(--primary); }
+  .opt:hover::before { border-color: var(--primary); }
+}
+.opt:active { transform: scale(.99); }
+.opt.picked {
+  border-color: var(--primary);
+  background: var(--tint);
+}
+.opt.picked::before {
+  border-color: var(--primary);
+  background: var(--primary);
+  box-shadow: inset 0 0 0 4px var(--tint);
+}
+
+/* 結果頁 */
+.result .kicker { color: var(--muted); font-size: .98rem; }
+.result h1 {
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: clamp(2.3rem, 10vw, 3.4rem);
+  line-height: 1.25;
+  letter-spacing: .03em;
+  margin-top: 2px;
+}
+.result .tagline {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-top: 10px;
+  color: var(--primary);
+}
+.result .desc { margin-top: 14px; }
+.result section { margin-top: 44px; }
+.result h2 {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 16px;
+}
+
+.alloc {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 28px;
+  align-items: center;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 22px;
+  padding: 24px;
+}
+.donut { position: relative; width: 180px; height: 180px; margin: 0 auto; }
+.donut svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.donut circle { fill: none; stroke-width: 5.2; }
+.donut .track { stroke: var(--line); }
+.donut .seg { transition: stroke-dasharray .9s cubic-bezier(.4, 0, .2, 1); }
+.donut-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  line-height: 1.25;
+}
+.donut-center b { font-family: var(--serif); font-weight: 900; font-size: 1.9rem; }
+.donut-center span { color: var(--muted); font-size: .9rem; }
+.legend { display: grid; gap: 14px; }
+.legend li { display: grid; grid-template-columns: 14px 1fr auto; column-gap: 10px; align-items: baseline; }
+.legend i { width: 12px; height: 12px; border-radius: 50%; align-self: center; }
+.legend .nm { font-weight: 700; }
+.legend .pc { font-weight: 700; font-variant-numeric: tabular-nums; }
+.legend .ex { grid-column: 2 / 4; color: var(--muted); font-size: .88rem; line-height: 1.55; }
+.legend li.zero .nm, .legend li.zero .pc { color: var(--muted); font-weight: 400; }
+
+.callout {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border-left: 5px solid var(--note-line);
+  background: var(--note-bg);
+  font-size: .98rem;
+}
+.callout h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+.callout.warn { border-left-color: var(--warn-line); background: var(--warn-bg); }
+
+.notes { display: grid; gap: 12px; }
+.notes li {
+  position: relative;
+  padding-left: 22px;
+}
+.notes li::before {
+  content: "";
+  position: absolute;
+  left: 2px; top: .72em;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+.result .actions { margin-top: 44px; }
+.result .actions .btn { width: 100%; }
+
+.disclaimer {
+  margin-top: 36px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .85rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 520px) {
+  .alloc { grid-template-columns: 1fr; padding: 22px 18px; }
+  .map-grid { aspect-ratio: 1 / 1; }
+  .cell { padding: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <!-- 開始頁 -->
+  <div id="start" class="screen start">
+    <h1>你的錢，<br>適合放在哪裡？</h1>
+    <p class="lead">回答 10 個生活情境題，大約 2 分鐘。看看定存、基金、ETF 和個股，哪一種比較符合你的個性和現況。</p>
+    <button class="btn" id="startBtn" type="button">開始測驗</button>
+    <div class="map" id="startMap" aria-hidden="true"></div>
+    <p class="map-caption">測驗會從「能承受多少風險」和「願意花多少心力」兩個方向，找出你的位置。</p>
+  </div>
+
+  <!-- 答題頁 -->
+  <div id="quiz" class="screen" hidden>
+    <div class="progress-row">
+      <p class="count" id="count" aria-live="polite"></p>
+      <button class="link-btn" id="backBtn" type="button">上一題</button>
+    </div>
+    <div class="bar" id="bar" aria-hidden="true"></div>
+    <div class="q-body" id="qBody">
+      <h2 class="q-text" id="qText" tabindex="-1"></h2>
+      <div class="options" id="options"></div>
+    </div>
+  </div>
+
+  <!-- 結果頁 -->
+  <div id="result" class="screen result" hidden>
+    <p class="kicker">你的投資風格是</p>
+    <h1 id="rName" tabindex="-1"></h1>
+    <p class="tagline" id="rTagline"></p>
+    <p class="desc" id="rDesc"></p>
+
+    <section>
+      <h2>建議的配置比例</h2>
+      <div class="alloc">
+        <div class="donut">
+          <svg viewBox="0 0 42 42" role="img" id="donutSvg"></svg>
+          <div class="donut-center"><b id="mainPct"></b><span id="mainName"></span></div>
+        </div>
+        <ul class="legend" id="legend"></ul>
+      </div>
+      <div class="callout" id="adjust" hidden></div>
+      <div class="callout warn" id="leverage" hidden></div>
+    </section>
+
+    <section>
+      <h2>你在圖上的位置</h2>
+      <div class="map" id="resultMap"></div>
+    </section>
+
+    <section>
+      <h2>這個類型要注意的事</h2>
+      <ul class="notes" id="rNotes"></ul>
+    </section>
+
+    <div class="actions">
+      <button class="btn btn-ghost" id="restartBtn" type="button">重新測驗</button>
+    </div>
+  </div>
+
+  <p class="disclaimer">本測驗僅供參考，不構成投資建議。投資有風險，做決定前請先評估自己的財務狀況，必要時請諮詢專業人士。</p>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  // dim: r = 風險承受度, i = 投入程度, c = 資金狀況；選項分數依序為 0 到 3
+  var QUESTIONS = [
+    { id: "loss", dim: "r", text: "你投入的 10 萬元，一個月後帳面只剩 8 萬。你會怎麼做？",
+      options: ["全部賣掉，不想再虧下去", "賣掉一部分，讓自己安心一點", "先不動，等它漲回來", "當初買進的理由還在的話，再加碼"] },
+    { id: "time", dim: "i", text: "你每週願意花多少時間在投資上？",
+      options: ["幾乎不想花時間", "一小時以內", "二到五小時", "五小時以上，我對這個有興趣"] },
+    { id: "range", dim: "r", text: "下面四種一年後的可能結果，你會選哪一個？",
+      options: ["穩穩多 1% 到 2%，不會虧", "可能賺 6%，也可能虧 3%", "可能賺 15%，也可能虧 10%", "可能賺 40%，也可能虧 30%"] },
+    { id: "fund", dim: "c", text: "如果明天突然沒有收入，你手上的存款可以支撐多久的生活？",
+      options: ["不到一個月", "一到三個月", "三到六個月", "六個月以上"] },
+    { id: "mood", dim: "r", text: "投資的錢正在虧損時，你的日常生活會怎樣？",
+      options: ["睡不好，腦中一直想著這件事", "常常忍不住打開帳戶查看", "有點在意，但生活照常", "幾乎不受影響"] },
+    { id: "know", dim: "i", text: "下面哪一句話最接近你現在的狀況？",
+      options: ["我不太清楚股票和基金有什麼差別", "我知道 ETF 是一次買進一籃子股票", "我看得懂本益比、殖利率這類數字", "我會讀財報，也有自己的選股方法"] },
+    { id: "crash", dim: "r", text: "新聞說股市一週內大跌了 15%。你的第一個念頭是什麼？",
+      options: ["趕快把錢移到安全的地方", "先觀望，暫時不再投入", "長期來看會漲回來，照原本的計畫走", "這是便宜買進的機會"] },
+    { id: "horizon", dim: "c", text: "這筆打算拿來投資的錢，多久之內可能會用到？",
+      options: ["一年之內", "一到三年", "三到五年", "五年以上，或沒有特定用途"] },
+    { id: "style", dim: "i", text: "決定要買什麼的時候，你比較想怎麼做？",
+      options: ["不想選，越簡單越好", "買一個涵蓋整個市場的商品就好", "我會比較幾個選項再決定", "我想自己研究、自己挑"] },
+    { id: "lever", dim: "r", text: "有人建議你借錢，或用融資、槓桿型 ETF 來放大報酬。你會怎麼想？",
+      options: ["絕對不會", "不太會，聽起來風險太高", "了解清楚之後，可能小額嘗試", "會，我想放大報酬"] }
+  ];
+
+  var ASSETS = [
+    { key: "deposit", name: "定存", color: "var(--c-deposit)", ex: "把錢存在銀行固定一段時間，本金有保障，利息固定但不高。" },
+    { key: "fund", name: "基金", color: "var(--c-fund)", ex: "交給經理人投資。這裡指債券型或平衡型，波動通常比股票小。" },
+    { key: "etf", name: "ETF", color: "var(--c-etf)", ex: "一次買進一籃子股票。這裡指追蹤大盤的類型，費用低、風險分散。" },
+    { key: "stock", name: "個股", color: "var(--c-stock)", ex: "直接買單一公司的股票，漲跌幅度最大，需要自己研究。" }
+  ];
+
+  // 圖上的四格，順序為左上、右上、左下、右下
+  var CELLS = ["passive", "active", "safe", "trust"];
+
+  var TYPES = {
+    safe: {
+      name: "穩健保守型", asset: "deposit", tagline: "先守住本金，再談成長。",
+      desc: "你重視安心，不希望為了多一點報酬而擔心虧損，也不打算花太多時間研究。以定存為主，再少量搭配穩健的商品，比較符合你的步調。",
+      alloc: { deposit: 70, fund: 15, etf: 15, stock: 0 },
+      notes: [
+        "定存的利息可能追不上物價上漲。長期全部放定存，錢能買到的東西會慢慢變少。",
+        "想踏出第一步的話，可以用小額定期定額買大盤型 ETF，先感受一下漲跌。",
+        "先確認緊急預備金足夠，再考慮其他投資。"
+      ]
+    },
+    trust: {
+      name: "穩健託付型", asset: "fund", tagline: "願意做功課，但不想坐雲霄飛車。",
+      desc: "你願意花時間了解和比較，但不喜歡大起大落。債券型或平衡型基金由專業經理人操作，波動通常比股票小，適合當你的主力。",
+      alloc: { deposit: 30, fund: 50, etf: 20, stock: 0 },
+      notes: [
+        "基金的手續費和管理費會吃掉報酬，買之前先比較總費用。",
+        "過去的績效不代表未來，不要只看近一年的排名。",
+        "債券型基金也會下跌，利率上升時價格通常會下滑。"
+      ]
+    },
+    passive: {
+      name: "被動成長型", asset: "etf", tagline: "買下整個市場，然後去過生活。",
+      desc: "你能接受短期的漲跌，但不想花時間選股。大盤型 ETF 一次持有許多公司，費用低，定期定額買進就能參與市場的長期成長。",
+      alloc: { deposit: 20, fund: 10, etf: 70, stock: 0 },
+      notes: [
+        "市場大跌時，最難的是什麼都不做。先想好到時候你要怎麼應對。",
+        "ETF 的種類很多，主題型、高股息型和大盤型的風險並不一樣。",
+        "至少留三到六個月的生活費在定存，才不會被迫在低點賣出。"
+      ]
+    },
+    active: {
+      name: "積極研究型", asset: "stock", tagline: "自己研究，自己決定，自己負責。",
+      desc: "你能承受較大的波動，也願意花時間研究公司。可以用一部分資金買個股，同時用 ETF 當核心，避免把成敗押在少數幾檔股票上。",
+      alloc: { deposit: 10, fund: 5, etf: 40, stock: 45 },
+      notes: [
+        "單一個股不要占太高的比例，再有把握的公司也可能出意外。",
+        "多數自己選股的人長期贏不過大盤，記得定期拿自己的成績和 ETF 比較。",
+        "寫下每次買進的理由，之後才能分辨是判斷正確還是運氣好。"
+      ]
+    }
+  };
+
+  var answers = {};
+  var current = 0;
+  var locked = false;
+
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function show(id) {
+    ["start", "quiz", "result"].forEach(function (s) { $(s).hidden = s !== id; });
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- 兩軸圖 ----------
+  function buildMap(container, activeKey, pos) {
+    container.textContent = "";
+    var y = el("div", "axis axis-y");
+    y.appendChild(el("span", null, "低"));
+    y.appendChild(el("strong", null, "風險承受度"));
+    y.appendChild(el("span", null, "高"));
+    var grid = el("div", "map-grid");
+    CELLS.forEach(function (key) {
+      var t = TYPES[key];
+      var asset = ASSETS.filter(function (a) { return a.key === t.asset; })[0];
+      var cell = el("div", "cell" + (key === activeKey ? " active" : ""));
+      var inst = el("span", "inst");
+      var sw = el("i");
+      sw.style.background = asset.color;
+      inst.appendChild(sw);
+      inst.appendChild(document.createTextNode(asset.name));
+      cell.appendChild(inst);
+      cell.appendChild(el("span", "tname", t.name));
+      grid.appendChild(cell);
+    });
+    var x = el("div", "axis axis-x");
+    x.appendChild(el("span", null, "低"));
+    x.appendChild(el("strong", null, "投入程度"));
+    x.appendChild(el("span", null, "高"));
+    container.appendChild(y);
+    container.appendChild(grid);
+    container.appendChild(x);
+
+    if (pos) {
+      var dot = el("div", "dot");
+      dot.style.left = (pos.x * 100) + "%";
+      dot.style.bottom = (pos.y * 100) + "%";
+      dot.setAttribute("role", "img");
+      dot.setAttribute("aria-label", "你的位置");
+      grid.appendChild(dot);
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { dot.classList.add("in"); });
+      });
+    }
+  }
+
+  // ---------- 答題 ----------
+  function renderBar() {
+    var bar = $("bar");
+    bar.textContent = "";
+    QUESTIONS.forEach(function (_, idx) {
+      var s = el("span", idx < current ? "done" : idx === current ? "now" : "");
+      bar.appendChild(s);
+    });
+  }
+
+  function renderQuestion(focus) {
+    var q = QUESTIONS[current];
+    locked = false;
+    $("count").innerHTML = "";
+    $("count").appendChild(document.createTextNode("第 "));
+    $("count").appendChild(el("b", null, String(current + 1)));
+    $("count").appendChild(document.createTextNode(" 題，共 " + QUESTIONS.length + " 題"));
+    $("backBtn").style.visibility = current === 0 ? "hidden" : "visible";
+    renderBar();
+
+    $("qText").textContent = q.text;
+    var box = $("options");
+    box.textContent = "";
+    q.options.forEach(function (label, score) {
+      var b = el("button", "opt" + (answers[q.id] === score ? " picked" : ""), label);
+      b.type = "button";
+      b.addEventListener("click", function () { pick(score, b); });
+      box.appendChild(b);
+    });
+
+    var body = $("qBody");
+    body.classList.remove("swap");
+    void body.offsetWidth;
+    body.classList.add("swap");
+    if (focus) $("qText").focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  }
+
+  function pick(score, btn) {
+    if (locked) return;
+    locked = true;
+    var q = QUESTIONS[current];
+    answers[q.id] = score;
+    Array.prototype.forEach.call($("options").children, function (c) { c.classList.remove("picked"); });
+    btn.classList.add("picked");
+    setTimeout(function () {
+      if (current < QUESTIONS.length - 1) {
+        current += 1;
+        renderQuestion(true);
+      } else {
+        renderResult();
+      }
+    }, 260);
+  }
+
+  // ---------- 計分 ----------
+  function compute() {
+    var sum = { r: 0, i: 0, c: 0 }, max = { r: 0, i: 0, c: 0 };
+    QUESTIONS.forEach(function (q) {
+      sum[q.dim] += answers[q.id] || 0;
+      max[q.dim] += 3;
+    });
+    var r = sum.r / max.r, i = sum.i / max.i;
+    var key = r < 0.5 ? (i < 0.5 ? "safe" : "trust") : (i < 0.5 ? "passive" : "active");
+    var type = TYPES[key];
+    var alloc = { deposit: type.alloc.deposit, fund: type.alloc.fund, etf: type.alloc.etf, stock: type.alloc.stock };
+
+    // 資金狀況不佳時，把配置往定存移動
+    var shift = 0, reasons = [];
+    if (answers.fund === 0) { shift += 25; reasons.push("你的存款不到一個月的生活費"); }
+    else if (answers.fund === 1) { shift += 15; reasons.push("你的存款只夠一到三個月的生活費"); }
+    if (answers.horizon === 0) { shift += 25; reasons.push("這筆錢一年之內可能要用到"); }
+    else if (answers.horizon === 1) { shift += 15; reasons.push("這筆錢一到三年內可能要用到"); }
+    var moved = 0;
+    ["stock", "etf", "fund"].forEach(function (k) {
+      var take = Math.min(alloc[k], shift - moved);
+      alloc[k] -= take;
+      moved += take;
+    });
+    alloc.deposit += moved;
+
+    // 槓桿警示：有意願，但資金或經驗不足
+    var levReasons = [];
+    if (answers.lever >= 2) {
+      if (answers.fund <= 1) levReasons.push("緊急預備金還不夠");
+      if (answers.horizon <= 1) levReasons.push("這筆錢短期內可能要用到");
+      if (answers.know <= 1) levReasons.push("投資經驗還在累積");
+    }
+
+    return {
+      key: key, type: type, alloc: alloc, moved: moved, reasons: reasons, levReasons: levReasons,
+      pos: { x: Math.min(0.94, Math.max(0.06, i)), y: Math.min(0.94, Math.max(0.06, r)) }
+    };
+  }
+
+  // ---------- 結果 ----------
+  function renderResult() {
+    var res = compute();
+    var t = res.type;
+    $("rName").textContent = t.name;
+    $("rTagline").textContent = t.tagline;
+    $("rDesc").textContent = t.desc;
+
+    // 圓餅圖
+    var svg = $("donutSvg");
+    var NS = "http://www.w3.org/2000/svg";
+    svg.textContent = "";
+    var track = document.createElementNS(NS, "circle");
+    track.setAttribute("class", "track");
+    track.setAttribute("cx", 21); track.setAttribute("cy", 21); track.setAttribute("r", 15.9155);
+    svg.appendChild(track);
+    var offset = 0, segs = [], summary = [];
+    ASSETS.forEach(function (a) {
+      var pct = res.alloc[a.key];
+      summary.push(a.name + " " + pct + "%");
+      if (pct <= 0) return;
+      var c = document.createElementNS(NS, "circle");
+      c.setAttribute("class", "seg");
+      c.setAttribute("cx", 21); c.setAttribute("cy", 21); c.setAttribute("r", 15.9155);
+      c.style.stroke = a.color;
+      c.setAttribute("stroke-dasharray", "0 100");
+      c.setAttribute("stroke-dashoffset", String(-offset));
+      svg.appendChild(c);
+      // 相鄰色塊之間留一點間隔
+      var len = pct >= 100 ? 100 : Math.max(pct - 0.8, 0.5);
+      segs.push({ node: c, len: len });
+      offset += pct;
+    });
+    svg.setAttribute("aria-label", "建議配置：" + summary.join("、"));
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        segs.forEach(function (s) {
+          s.node.setAttribute("stroke-dasharray", s.len + " " + (100 - s.len));
+        });
+      });
+    });
+
+    var main = ASSETS.slice().sort(function (a, b) { return res.alloc[b.key] - res.alloc[a.key]; })[0];
+    $("mainPct").textContent = res.alloc[main.key] + "%";
+    $("mainName").textContent = main.name;
+
+    var legend = $("legend");
+    legend.textContent = "";
+    ASSETS.forEach(function (a) {
+      var pct = res.alloc[a.key];
+      var li = el("li", pct === 0 ? "zero" : "");
+      var sw = el("i");
+      sw.style.background = a.color;
+      li.appendChild(sw);
+      li.appendChild(el("span", "nm", a.name));
+      li.appendChild(el("span", "pc", pct + "%"));
+      li.appendChild(el("span", "ex", a.ex));
+      legend.appendChild(li);
+    });
+
+    // 資金狀況調整說明
+    var adj = $("adjust");
+    adj.textContent = "";
+    if (res.moved > 0) {
+      adj.appendChild(el("h3", null, "已依你的資金狀況調整"));
+      adj.appendChild(el("p", null,
+        "因為" + res.reasons.join("，而且") + "，我們把 " + res.moved +
+        "% 的配置從波動較大的商品移到定存。等預備金存到六個月以上、資金可以放久一點，再逐步提高投資比例。"));
+      adj.hidden = false;
+    } else {
+      adj.hidden = true;
+    }
+
+    // 槓桿提醒
+    var lev = $("leverage");
+    lev.textContent = "";
+    if (res.levReasons.length) {
+      lev.appendChild(el("h3", null, "關於槓桿的提醒"));
+      lev.appendChild(el("p", null,
+        "你提到會考慮借錢或用槓桿投資，但你的" + res.levReasons.join("、") +
+        "。槓桿會同時放大獲利和虧損，借錢投資時，虧損可能超過你原本投入的錢。槓桿型 ETF 追蹤的是「單日」報酬的倍數，長期持有的結果可能和預期差很多。建議現階段先不要使用。"));
+      lev.hidden = false;
+    } else {
+      lev.hidden = true;
+    }
+
+    buildMap($("resultMap"), res.key, res.pos);
+
+    var notes = $("rNotes");
+    notes.textContent = "";
+    t.notes.forEach(function (n) { notes.appendChild(el("li", null, n)); });
+
+    show("result");
+    $("rName").focus({ preventScroll: true });
+  }
+
+  // ---------- 事件 ----------
+  $("startBtn").addEventListener("click", function () {
+    answers = {};
+    current = 0;
+    show("quiz");
+    renderQuestion(true);
+  });
+  $("backBtn").addEventListener("click", function () {
+    if (current > 0 && !locked) {
+      current -= 1;
+      renderQuestion(true);
+    }
+  });
+  $("restartBtn").addEventListener("click", function () {
+    answers = {};
+    current = 0;
+    show("quiz");
+    renderQuestion(true);
+  });
+  document.addEventListener("keydown", function (e) {
+    if ($("quiz").hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+    var n = parseInt(e.key, 10);
+    if (n >= 1 && n <= 4) {
+      var btn = $("options").children[n - 1];
+      if (btn) pick(n - 1, btn);
+    }
+  });
+
+  buildMap($("startMap"), null, null);
+})();
+</script>
+</body>
+</html>
